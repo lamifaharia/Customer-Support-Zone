@@ -1,8 +1,37 @@
-
+import { useState, useEffect } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import initialTickets from "./data/tickets.json";
 import vectorImg from "./assets/vector1.png";
+import { FaSquareXTwitter } from "react-icons/fa6";
+import { FaLinkedin } from "react-icons/fa";
+import { FaFacebook } from "react-icons/fa";
+import { ImMail4 } from "react-icons/im";
 
 
-  
+
+export default function App() {
+  const [tickets] = useState(initialTickets);
+  const [inProgress, setInProgress] = useState([]);
+  const [resolvedCount, setResolvedCount] = useState(0);
+
+  const handleSelect = (ticket) => {
+    const isExist = inProgress.find((t) => t.id === ticket.id);
+    if (isExist) {
+      toast.error("Already In Progress!");
+      return;
+    }
+    setInProgress([...inProgress, ticket]);
+    toast.success("Added to Task Status!");
+  };
+
+  const handleComplete = (id) => {
+    setInProgress(inProgress.filter((t) => t.id !== id));
+    setResolvedCount(resolvedCount + 1);
+    toast.info("Ticket Resolved Successfully!");
+  };
+
+  return (
     <div className="min-h-screen bg-gray-50">
       {/* -----------------Navbar--------------------- */}
       <nav className="flex justify-between items-center py-5 px-12 bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
@@ -93,12 +122,79 @@ import vectorImg from "./assets/vector1.png";
         {/*-------------------- Banner Section - End -----------------*/}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-         
+          {/* ---------------------Tickets List---------------------- */}
+          <div className="lg:col-span-2">
+            <h3 className="text-2xl font-black text-gray-800 mb-8">
+              Available Tickets
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {tickets.map((ticket) => (
+                <div
+                  key={ticket.id}
+                  onClick={() => handleSelect(ticket)}
+                  className="bg-white p-6 rounded-2xl border-2 border-transparent shadow-sm hover:border-[#422AD5] hover:shadow-xl cursor-pointer transition-all"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <h4 className="font-bold text-gray-800">{ticket.title}</h4>
+                    <span className="bg-emerald-50 text-emerald-600 text-[9px] px-2 py-1 rounded-full font-black uppercase">
+                      Open
+                    </span>
+                  </div>
+                  <p className="text-gray-400 text-xs mb-6 line-clamp-2">
+                    {ticket.description}
+                  </p>
+                  <div className="flex justify-between items-center text-[10px] font-bold border-t pt-4 uppercase">
+                    <span
+                      className={`${ticket.priority === "High" ? "text-red-500 bg-red-50" : "text-orange-500 bg-orange-50"} px-2 py-1 rounded-md`}
+                    >
+                      {ticket.priority} Priority
+                    </span>
+                    <span className="text-gray-400">
+                      {ticket.customer} | #{ticket.id}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-          
+          {/*----------------------------- Sidebar----------------------------- */}
+          <div>
+            <h3 className="text-2xl font-black text-gray-800 mb-8">
+              Task Status
+            </h3>
+            <div className="bg-white p-6 rounded-[2rem] border border-gray-100 min-h-[300px]">
+              {inProgress.length === 0 ? (
+                <p className="text-gray-300 font-bold italic text-sm text-center py-20">
+                  No Tickets Selected
+                </p>
+              ) : (
+                inProgress.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex justify-between items-center bg-gray-50 p-4 rounded-2xl mb-4 border border-gray-200"
+                  >
+                    <p className="text-[11px] font-black text-gray-800 truncate w-32 uppercase">
+                      {item.title}
+                    </p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleComplete(item.id);
+                      }}
+                      className="bg-[#10B981] text-white px-4 py-2 rounded-xl text-[10px] font-black"
+                    >
+                      DONE
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
       </main>
           {/* ---------------------------footer--------------------------- */}
+
       <footer className="bg-[#01040d] text-white pt-20 pb-10 px-12 mt-24">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
           {/* --------------------------Column 1------------------------- */}
@@ -205,7 +301,11 @@ import vectorImg from "./assets/vector1.png";
         </div>
       </footer>
 
-      
+      <ToastContainer
+        position="bottom-right"
+        autoClose={2000}
+        theme="colored"
+      />
     </div>
-  
-
+  );
+}
